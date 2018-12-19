@@ -1,0 +1,73 @@
+service:
+  name: sairi-bus-data-provider
+
+plugins:
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: ap-northeast-1
+  timeout: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/SairiBusData"
+  environment:
+    DYNAMODB_REGION: 'ap-northeast-1'
+    DYNAMODB_TABLE_NAME: 'SairiBusData'
+
+resources:
+  Resources:
+    SairiBusData:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SairiBusData
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+functions:
+  fetch-bus-data:
+    handler: src/functions/fetch-bus-data.handler
+    events:
+      - http:
+          method: get
+          path: fetch-bus-data
+  fetch-library-data:
+    handler: src/functions/fetch-library-data.handler
+    events:
+      - http:
+          method: get
+          path: fetch-library-data
+  fetch-restaurant-data:
+    handler: src/functions/fetch-restaurant-data.handler
+    events:
+      - http:
+          method: get
+          path: fetch-restaurant-data
+  # send-data:
+  #   handler: send-data.handler
+  #   events:
+  #     - http:
+  #         method: get
+  #         path: data
+
+package:
+  exclude:
+    - .git/**
+    - README.md
