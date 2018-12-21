@@ -63,7 +63,8 @@ const fetchLibraryData = async (): Promise<RestaurantData> => {
           schedule = {
             id: uuidv4(),
             startTime: JSTTime.fromColonSeparatedText(startTimeString),
-            endTime: JSTTime.fromColonSeparatedText(endTimeString)
+            endTime: JSTTime.fromColonSeparatedText(endTimeString),
+            laneIndex: 0
           };
         }
         restaurantData.dailyRestaurantDataList.push({

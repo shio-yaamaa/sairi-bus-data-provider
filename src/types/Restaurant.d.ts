@@ -25,4 +25,5 @@ export interface RestaurantSchedule extends Schedule {
   id: string;
   startTime: JSTTime;
   endTime: JSTTime;
+  laneIndex: number;
 }

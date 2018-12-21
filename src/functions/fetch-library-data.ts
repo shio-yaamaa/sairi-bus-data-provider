@@ -63,7 +63,8 @@ const fetchLibraryData = async (): Promise<LibraryData> => {
           id: uuidv4(),
           startTime: JSTTime.fromColonSeparatedText(startTimeString),
           endTime: endsNextMorning ? null : JSTTime.fromColonSeparatedText(endTimeString),
-          endsNextMorning
+          endsNextMorning,
+          laneIndex: 0
         };
       }
 

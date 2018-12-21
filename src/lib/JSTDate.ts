@@ -20,6 +20,14 @@ export default class JSTDate {
     );
   }
 
+  public static fromNumber(number: number): JSTDate {
+    return new JSTDate(
+      Math.floor(number / 10 ** 4),
+      Math.floor(number % 10 ** 4 / 10 ** 2),
+      number % 10 ** 2
+    );
+  }
+
   public toNumber(): number {
     return this.year * 10 ** 4 + this.month * 10 ** 2 + this.date;
   }

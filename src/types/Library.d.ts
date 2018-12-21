@@ -25,4 +25,5 @@ export interface LibrarySchedule extends Schedule {
   startTime: JSTTime;
   endTime: JSTTime | null; // null when endsNextMorning is true
   endsNextMorning: boolean;
+  laneIndex: number;
 }
