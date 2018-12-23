@@ -3,14 +3,13 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { JSDOM } from 'jsdom';
 import * as uuidv4 from 'uuid/v4';
 
-import { BUS_DATA_KEY } from '../constants/db-keys';
+import { RootItemKey, UpdateDateKey } from '../constants/db-keys';
 import { BUS_URL } from '../constants/urls';
 
 import {
-  BusDBEntry,
   BusData,
-  Section,
-  Direction,
+  BusSection,
+  BusDirection,
   BusSchedule
 } from '../types/Bus';
 
@@ -19,7 +18,7 @@ import JSTTime from '../lib/JSTTime';
 import assignLaneIndexToSchedules from '../utility/assignLaneIndexToSchedules';
 import { cleanUpText } from '../utility/text';
 
-const docClient = new AWS.DynamoDB.DocumentClient({
+const dynamodb = new AWS.DynamoDB({
   region: process.env.DYNAMODB_REGION
 });
 
@@ -40,7 +39,7 @@ const fetchBusData = async (): Promise<BusData> => {
   for (const [tableIndex, table] of tables.entries()) {
     // Extract the name of section endpoints that are located right above the table
     const sectionTitle = table.previousElementSibling.textContent;
-    const section: Section = {
+    const section: BusSection = {
       index: tableIndex,
       endpointNames: sectionTitle
         .substring(sectionTitle.indexOf('．') + 1, sectionTitle.indexOf('地区間'))
@@ -71,7 +70,7 @@ const fetchBusData = async (): Promise<BusData> => {
 
     // Get the name of the bus stops to construct Direction objects
     for (const [columnGroupIndex, columnGroup] of columnGroups.entries()) {
-      const direction: Direction = {
+      const direction: BusDirection = {
         index: columnGroupIndex,
         stopNames: [],
         schedules: []
@@ -145,21 +144,47 @@ const fetchBusData = async (): Promise<BusData> => {
 }
 
 const saveToDatabase = async (busData: BusData) => {
-  const entry: BusDBEntry = {
-    key: BUS_DATA_KEY,
-    updatedAt: JSTDate.getCurrentJSTDate(),
-    data: busData
+  const transactionParams: AWS.DynamoDB.TransactWriteItemsInput = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Item: {
+            key: {
+              S: RootItemKey.Bus
+            },
+            data: AWS.DynamoDB.Converter.input(busData)
+          }
+        }
+      },
+      {
+        Update: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Key: {
+            key: {
+              S: RootItemKey.UpdateDate
+            }
+          },
+          UpdateExpression: `SET #data.#update.#category = :date`,
+          ExpressionAttributeNames: {
+            '#data': 'data',
+            '#update': 'updateDates',
+            '#category': UpdateDateKey.Bus
+          },
+          ExpressionAttributeValues: {
+            ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())
+          }
+        }
+      }
+    ]
   };
-  const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
-    Item: entry
-  };
+
   try {
-    await docClient.put(params).promise();
+    await dynamodb.transactWriteItems(transactionParams).promise();
   } catch (error) {
     console.log('Error:', error);
   }
-}
+};
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   const busData = await fetchBusData();

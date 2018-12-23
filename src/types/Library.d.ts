@@ -1,11 +1,11 @@
+import { DBEntry } from './DBEntry';
 import { Schedule } from '../types/Schedule';
 
 import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
 
-export interface LibraryDBEntry {
+export interface LibraryDBEntry extends DBEntry {
   key: string;
-  updatedAt: JSTDate;
   data: LibraryData;
 }
 

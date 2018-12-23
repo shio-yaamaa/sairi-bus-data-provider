@@ -3,7 +3,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { JSDOM } from 'jsdom';
 import * as uuidv4 from 'uuid/v4';
 
-import { LIBRARY_DATA_KEY } from '../constants/db-keys';
+import { RootItemKey, UpdateDateKey } from '../constants/db-keys';
 import {
   MAIN_LIBRARY_URL,
   LIFE_SCIENCES_LIBRARY_URL,
@@ -12,7 +12,6 @@ import {
 } from '../constants/urls';
 
 import {
-  LibraryDBEntry,
   LibraryData,
   LibrarySchedule
 } from '../types/Library';
@@ -21,7 +20,7 @@ import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
 import { cleanUpText } from '../utility/text';
 
-const docClient = new AWS.DynamoDB.DocumentClient({
+const dynamodb = new AWS.DynamoDB({
   region: process.env.DYNAMODB_REGION
 });
 
@@ -81,21 +80,47 @@ const fetchLibraryData = async (): Promise<LibraryData> => {
 }
 
 const saveToDatabase = async (libraryData: LibraryData) => {
-  const entry: LibraryDBEntry = {
-    key: LIBRARY_DATA_KEY,
-    updatedAt: JSTDate.getCurrentJSTDate(),
-    data: libraryData
+  const transactionParams: AWS.DynamoDB.TransactWriteItemsInput = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Item: {
+            key: {
+              S: RootItemKey.Library
+            },
+            data: AWS.DynamoDB.Converter.input(libraryData)
+          }
+        }
+      },
+      {
+        Update: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Key: {
+            key: {
+              S: RootItemKey.UpdateDate
+            }
+          },
+          UpdateExpression: `SET #data.#update.#category = :date`,
+          ExpressionAttributeNames: {
+            '#data': 'data',
+            '#update': 'updateDates',
+            '#category': UpdateDateKey.Library
+          },
+          ExpressionAttributeValues: {
+            ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())
+          }
+        }
+      }
+    ]
   };
-  const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
-    Item: entry
-  };
+
   try {
-    await docClient.put(params).promise();
+    await dynamodb.transactWriteItems(transactionParams).promise();
   } catch (error) {
     console.log('Error:', error);
   }
-}
+};
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   const libraryData = await fetchLibraryData();

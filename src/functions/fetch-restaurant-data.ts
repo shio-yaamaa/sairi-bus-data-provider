@@ -3,11 +3,10 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { JSDOM } from 'jsdom';
 import * as uuidv4 from 'uuid/v4';
 
-import { RESTAURANT_DATA_KEY } from '../constants/db-keys';
+import { RootItemKey, UpdateDateKey } from '../constants/db-keys';
 import { RESTAURANT_URLS } from '../constants/urls';
 
 import {
-  RestaurantDBEntry,
   RestaurantData,
   RestaurantSchedule
 } from '../types/Restaurant';
@@ -17,7 +16,7 @@ import JSTTime from '../lib/JSTTime';
 
 import { cleanUpText } from '../utility/text';
 
-const docClient = new AWS.DynamoDB.DocumentClient({
+const dynamodb = new AWS.DynamoDB({
   region: process.env.DYNAMODB_REGION
 });
 
@@ -83,21 +82,47 @@ const fetchLibraryData = async (): Promise<RestaurantData> => {
 }
 
 const saveToDatabase = async (restaurantData: RestaurantData) => {
-  const entry: RestaurantDBEntry = {
-    key: RESTAURANT_DATA_KEY,
-    updatedAt: JSTDate.getCurrentJSTDate(),
-    data: restaurantData
+  const transactionParams: AWS.DynamoDB.TransactWriteItemsInput = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Item: {
+            key: {
+              S: RootItemKey.Restaurant
+            },
+            data: AWS.DynamoDB.Converter.input(restaurantData)
+          }
+        }
+      },
+      {
+        Update: {
+          TableName: process.env.DYNAMODB_TABLE_NAME,
+          Key: {
+            key: {
+              S: RootItemKey.UpdateDate
+            }
+          },
+          UpdateExpression: `SET #data.#update.#category = :date`,
+          ExpressionAttributeNames: {
+            '#data': 'data',
+            '#update': 'updateDates',
+            '#category': UpdateDateKey.Restaurant
+          },
+          ExpressionAttributeValues: {
+            ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())
+          }
+        }
+      }
+    ]
   };
-  const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
-    Item: entry
-  };
+
   try {
-    await docClient.put(params).promise();
+    await dynamodb.transactWriteItems(transactionParams).promise();
   } catch (error) {
     console.log('Error:', error);
   }
-}
+};
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   const restaurantData = await fetchLibraryData();

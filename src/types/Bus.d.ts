@@ -1,25 +1,25 @@
+import { DBEntry } from './DBEntry';
 import { Schedule } from '../types/Schedule';
 
 import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
 
-export interface BusDBEntry {
+export interface BusDBEntry extends DBEntry {
   key: string;
-  updatedAt: JSTDate;
   data: BusData;
 }
 
 export interface BusData {
-  sections: Section[];
+  sections: BusSection[];
 }
 
-export interface Section {
+export interface BusSection {
   index: number;
   endpointNames: string[];
-  directions: Direction[];
+  directions: BusDirection[];
 }
 
-export interface Direction {
+export interface BusDirection {
   index: number;
   stopNames: string[];
   schedules: BusSchedule[];
