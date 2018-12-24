@@ -73,7 +73,6 @@ const fetchLibraryData = async (): Promise<RestaurantData> => {
           date: new JSTDate(currentDate.year, currentDate.month, date),
           schedules: isClosed ? [] : [schedule]
         });
-        console.log(restaurantData.dailyRestaurantDataList[restaurantData.dailyRestaurantDataList.length - 1]);
       }
     }
   }
