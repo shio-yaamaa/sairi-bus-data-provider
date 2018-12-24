@@ -3,7 +3,7 @@ export enum RootItemKey {
   Bus = 'bus-data',
   Library = 'library-data',
   Restaurant = 'restaurant-data',
-  UpdateDate = 'update-date'
+  UpdateDate = 'update-date-data'
 }
 
 export enum UpdateDateKey {

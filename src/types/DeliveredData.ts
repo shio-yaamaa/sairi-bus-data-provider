@@ -6,7 +6,6 @@ import { RestaurantData } from './Restaurant';
 
 export interface DeliveredData {
   updateDateData: UpdateDateData;
-  classworkData: ClassworkData;
   busData: BusData;
   libraryData: LibraryData;
   restaurantData: RestaurantData;
