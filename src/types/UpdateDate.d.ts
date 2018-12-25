@@ -7,11 +7,12 @@ export interface UpdateDateDBEntry extends DBEntry {
 }
 
 export interface UpdateDateData {
-  updateDates: UpdateDates
+  updateDates: UpdateDates;
 }
 
 export interface UpdateDates {
-  bus: JSTDate,
-  library: JSTDate,
-  restaurant: JSTDate
+  classwork?: JSTDate;
+  bus: JSTDate;
+  library: JSTDate;
+  restaurant: JSTDate;
 }

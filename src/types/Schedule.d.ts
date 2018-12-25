@@ -9,5 +9,5 @@ export interface Schedule {
 
 export interface Lane {
   index: number;
-  schedules: Schedule[]
+  schedules: Schedule[];
 }
