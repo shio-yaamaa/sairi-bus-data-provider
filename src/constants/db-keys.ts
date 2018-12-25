@@ -7,7 +7,7 @@ export enum RootItemKey {
 }
 
 export enum UpdateDateKey {
-  classwork = 'classwork',
+  Classwork = 'classwork',
   Bus = 'bus',
   Library = 'library',
   Restaurant = 'restaurant'
