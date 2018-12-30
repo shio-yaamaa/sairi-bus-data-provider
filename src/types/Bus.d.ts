@@ -1,13 +1,7 @@
-import { DBEntry } from './DBEntry';
 import { Schedule } from '../types/Schedule';
 
 import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
-
-export interface BusDBEntry extends DBEntry {
-  key: string;
-  data: BusData;
-}
 
 export interface BusData {
   sections: BusSection[];
@@ -29,9 +23,14 @@ export interface BusSchedule extends Schedule {
   id: string;
   startTime: JSTTime;
   endTime: JSTTime;
-  stopTimes: (JSTTime | null)[];
+  stopTimes: BusStopTime[];
   name: string;
   runsTwice: boolean;
   stopsAtRimd: boolean; // RIMD = Research Institute for Microbial Diseases, Osaka University
   laneIndex?: number;
+}
+
+export interface BusStopTime {
+  stopIndex: number;
+  time: JSTTime;
 }

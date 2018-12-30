@@ -1,13 +1,7 @@
-import { DBEntry } from './DBEntry';
 import { Schedule } from '../types/Schedule';
 
 import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
-
-export interface RestaurantDBEntry extends DBEntry {
-  key: string;
-  data: RestaurantData;
-}
 
 export interface RestaurantData {
   dailyRestaurantDataList: DailyRestaurantData[];

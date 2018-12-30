@@ -10,7 +10,8 @@ import {
   BusData,
   BusSection,
   BusDirection,
-  BusSchedule
+  BusSchedule,
+  BusStopTime
 } from '../types/Bus';
 
 import JSTDate from '../lib/JSTDate';
@@ -99,12 +100,12 @@ const fetchBusData = async (): Promise<BusData> => {
         name = name.replace('※', '');
 
         let runsTwice = false;
-        const stopTimes: JSTTime[] = tds
+        const stopTimes: BusStopTime[] = tds
           .slice(
             columnGroup.headerColumnIndex + 1,
             columnGroup.headerColumnIndex + 1 + columnGroup.bodyColumnCount
           )
-          .map(td => {
+          .map((td, tdIndex): BusStopTime | null => {
             let timeInText: string = cleanUpText(td.textContent);
             if (timeInText.includes('*')) {
               runsTwice = true;
@@ -116,13 +117,19 @@ const fetchBusData = async (): Promise<BusData> => {
             const timeElements = timeInText
               .split(':')
               .map(timeElement => parseInt(timeElement));
-            return new JSTTime(timeElements[0], timeElements[1], 0);
+            return {
+              stopIndex: tdIndex,
+              time: new JSTTime(timeElements[0], timeElements[1], 0)
+            };
+          })
+          .filter(stopTime => {
+            return stopTime !== null;
           });
 
         const busSchedule: BusSchedule = {
           id: uuidv4(),
-          startTime: stopTimes[0],
-          endTime: stopTimes[stopTimes.length - 1],
+          startTime: stopTimes[0].time,
+          endTime: stopTimes[stopTimes.length - 1].time,
           stopTimes,
           name,
           runsTwice,
