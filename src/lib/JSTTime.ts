@@ -1,15 +1,38 @@
 import * as moment from 'moment-timezone';
 import { cleanUpText } from '../utility/text';
 
-export default class JSTTime {
-  public hour: number;
-  public minute: number;
-  public second: number;
+export const JST_TIME_SCHEMA_NAME = 'JSTTime';
 
+export default class JSTTime {
+  public hour?: number;
+  public minute?: number;
+  public second?: number;
+
+  static schema = {
+    name: JST_TIME_SCHEMA_NAME,
+    properties: {
+      hour: {
+        type: 'int',
+        indexed: true
+      },
+      minute: {
+        type: 'int',
+        indexed: true
+      },
+      second: {
+        type: 'int',
+        indexed: true
+      }
+    }
+  };
+
+  // The constructor can be called by Realm's createObject function with no arguments provided.
+  // In that case, do not assign the value (undefined)
+  // since it tries to overwrite the data in Realm DB as well.
   constructor(hour: number, minute: number, second: number) {
-    this.hour = hour;
-    this.minute = minute;
-    this.second = second;
+    hour === undefined || (this.hour = hour);
+    minute === undefined || (this.minute = minute);
+    second === undefined || (this.second = second);
   }
 
   public static getCurrentJSTTime(): JSTTime {
@@ -22,7 +45,7 @@ export default class JSTTime {
   }
 
   public clone(): JSTTime {
-    return new JSTTime(this.hour, this.minute, this.second);
+    return new JSTTime(this.hour!, this.minute!, this.second!);
   }
 
   // Conversions
@@ -36,7 +59,7 @@ export default class JSTTime {
   }
 
   public toSeconds(): number {
-    return ((this.hour * 60) + this.minute) * 60 + this.second;
+    return ((this.hour! * 60) + this.minute!) * 60 + this.second!;
   }
 
   // hh:mm:ss or hh:mm
@@ -55,7 +78,7 @@ export default class JSTTime {
     return JSTTime.fromSeconds(Math.abs(time1.toSeconds() - time2.toSeconds()));
   }
 
-  // Used for ascending sorting an array of Times
+  // Used for ascending sorting an array of JSTTimes
   public static ascendingCompareFunction(time1: JSTTime, time2: JSTTime): number {
     return time1.toSeconds() - time2.toSeconds();
   }
@@ -88,22 +111,22 @@ export default class JSTTime {
 
   public roundUpSecond(toMultipleOfTen: boolean): JSTTime {
     if (toMultipleOfTen) {
-      if (this.second % 10 === 0) return this.clone();
-      return this.advance(new JSTTime(0, 0, 10 - this.second % 10));
+      if (this.second! % 10 === 0) return this.clone();
+      return this.advance(new JSTTime(0, 0, 10 - this.second! % 10));
     } else {
       if (this.second === 0) return this.clone();
-      return this.advance(new JSTTime(0, 0, 60 - this.second));
+      return this.advance(new JSTTime(0, 0, 60 - this.second!));
     }
   }
 
   public roundUpMinute(toMultipleOfTen: boolean): JSTTime {
     const secondRoundedUp = this.roundUpSecond(false);
     if (toMultipleOfTen) {
-      if (secondRoundedUp.minute % 10 === 0) return secondRoundedUp;
-      return secondRoundedUp.advance(new JSTTime(0, 10 - secondRoundedUp.minute % 10, 0));
+      if (secondRoundedUp.minute! % 10 === 0) return secondRoundedUp;
+      return secondRoundedUp.advance(new JSTTime(0, 10 - secondRoundedUp.minute! % 10, 0));
     } else {
       if (secondRoundedUp.minute === 0) return secondRoundedUp;
-      return secondRoundedUp.advance(new JSTTime(0, 60 - secondRoundedUp.minute, 0));
+      return secondRoundedUp.advance(new JSTTime(0, 60 - secondRoundedUp.minute!, 0));
     }
   }
 }

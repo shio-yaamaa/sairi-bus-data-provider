@@ -7,7 +7,7 @@ import { UpdateDateData } from '../types/UpdateDate';
 import { BusData } from '../types/Bus';
 import { LibraryData } from '../types/Library';
 import { RestaurantData } from '../types/Restaurant';
-import { DeliveredData } from '../types/DeliveredData';
+import { DeliveredData } from '../types/Data';
 
 const docClient = new AWS.DynamoDB.DocumentClient({
   region: process.env.DYNAMODB_REGION
