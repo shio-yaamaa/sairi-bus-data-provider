@@ -8,6 +8,7 @@ import { RESTAURANT_URLS } from '../constants/urls';
 
 import {
   RestaurantData,
+  RestaurantCampus,
   RestaurantSchedule
 } from '../types/Restaurant';
 
@@ -22,14 +23,18 @@ const dynamodb = new AWS.DynamoDB({
 
 const CLOSED_TEXT = '休業';
 
-const fetchLibraryData = async (): Promise<RestaurantData> => {
+const fetchRestaurantData = async (): Promise<RestaurantData> => {
   const restaurantData: RestaurantData = {
-    dailyRestaurantDataList: []
+    campuses: []
   };
 
-  for (const { campusName, url } of RESTAURANT_URLS) {
+  for (const [campusIndex, { campusName, url }] of RESTAURANT_URLS.entries()) {
+    const campus: RestaurantCampus = {
+      index: campusIndex,
+      name: campusName,
+      dailyDataList: []
+    };
     const { document } = (await JSDOM.fromURL(url)).window;
-
     const currentDate = JSTDate.getCurrentJSTDate();
 
     // Extract the restaurant calendar of this month
@@ -66,8 +71,7 @@ const fetchLibraryData = async (): Promise<RestaurantData> => {
             laneIndex: 0
           };
         }
-        restaurantData.dailyRestaurantDataList.push({
-          campusName,
+        campus.dailyDataList.push({
           restaurantIndex,
           restaurantName,
           date: new JSTDate(currentDate.year, currentDate.month, date),
@@ -75,6 +79,7 @@ const fetchLibraryData = async (): Promise<RestaurantData> => {
         });
       }
     }
+    restaurantData.campuses.push(campus);
   }
 
   return restaurantData;
@@ -102,11 +107,11 @@ const saveToDatabase = async (restaurantData: RestaurantData) => {
               S: RootItemKey.UpdateDate
             }
           },
-          UpdateExpression: `SET #data.#update.#category = :date`,
+          UpdateExpression: `SET #data.#update.#key = :date`,
           ExpressionAttributeNames: {
             '#data': 'data',
             '#update': 'updateDates',
-            '#category': UpdateDateKey.Restaurant
+            '#key': UpdateDateKey.Restaurant
           },
           ExpressionAttributeValues: {
             ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())
@@ -124,7 +129,7 @@ const saveToDatabase = async (restaurantData: RestaurantData) => {
 };
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
-  const restaurantData = await fetchLibraryData();
+  const restaurantData = await fetchRestaurantData();
   await saveToDatabase(restaurantData);
 
   return {

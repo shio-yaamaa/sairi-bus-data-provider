@@ -172,11 +172,11 @@ const saveToDatabase = async (busData: BusData) => {
               S: RootItemKey.UpdateDate
             }
           },
-          UpdateExpression: `SET #data.#update.#category = :date`,
+          UpdateExpression: `SET #data.#update.#key = :date`,
           ExpressionAttributeNames: {
             '#data': 'data',
             '#update': 'updateDates',
-            '#category': UpdateDateKey.Bus
+            '#key': UpdateDateKey.Bus
           },
           ExpressionAttributeValues: {
             ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())

@@ -4,7 +4,7 @@ import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
 
 export interface LibraryData {
-  dailyLibraryDataList: DailyLibraryData[];
+  dailyDataList: DailyLibraryData[];
 }
 
 export interface DailyLibraryData {

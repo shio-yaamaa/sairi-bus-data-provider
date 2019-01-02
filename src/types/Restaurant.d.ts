@@ -4,11 +4,16 @@ import JSTDate from '../lib/JSTDate';
 import JSTTime from '../lib/JSTTime';
 
 export interface RestaurantData {
-  dailyRestaurantDataList: DailyRestaurantData[];
+  campuses: RestaurantCampus[];
+}
+
+export interface RestaurantCampus {
+  index: number;
+  name: string;
+  dailyDataList: DailyRestaurantData[];
 }
 
 export interface DailyRestaurantData {
-  campusName: string;
   restaurantIndex: number;
   restaurantName: string;
   date: JSTDate;

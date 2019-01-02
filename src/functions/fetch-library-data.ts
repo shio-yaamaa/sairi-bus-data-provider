@@ -29,7 +29,7 @@ const NEXT_MORNING_TEXT = '翌朝';
 
 const fetchLibraryData = async (): Promise<LibraryData> => {
   const libraryData: LibraryData = {
-    dailyLibraryDataList: []
+    dailyDataList: []
   };
 
   for (const [libraryIndex, URL] of [MAIN_LIBRARY_URL, LIFE_SCIENCES_LIBRARY_URL, SCIENCE_AND_ENGINEERING_LIBRARY_URL, INTERNATIONAL_STUDIES_LIBRARY_URL].entries()) {
@@ -67,7 +67,7 @@ const fetchLibraryData = async (): Promise<LibraryData> => {
         };
       }
 
-      libraryData.dailyLibraryDataList.push({
+      libraryData.dailyDataList.push({
         libraryIndex,
         libraryName,
         date: new JSTDate(year, month, date),
@@ -101,11 +101,11 @@ const saveToDatabase = async (libraryData: LibraryData) => {
               S: RootItemKey.UpdateDate
             }
           },
-          UpdateExpression: `SET #data.#update.#category = :date`,
+          UpdateExpression: `SET #data.#update.#key = :date`,
           ExpressionAttributeNames: {
             '#data': 'data',
             '#update': 'updateDates',
-            '#category': UpdateDateKey.Library
+            '#key': UpdateDateKey.Library
           },
           ExpressionAttributeValues: {
             ':date': AWS.DynamoDB.Converter.input(JSTDate.getCurrentJSTDate())
