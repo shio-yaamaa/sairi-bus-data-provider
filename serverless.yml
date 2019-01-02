@@ -48,21 +48,24 @@ functions:
       - http:
           method: get
           path: fetch-bus-data
-      - schedule: cron(0 15 14,L * ? *)
+      - schedule: cron(0 15 14 * ? *)
+      - schedule: cron(0 15 L * ? *)
   fetch-library-data:
     handler: src/functions/fetch-library-data.handler
     events:
       - http:
           method: get
           path: fetch-library-data
-      - schedule: cron(0 15 14,L * ? *)
+      - schedule: cron(0 15 14 * ? *)
+      - schedule: cron(0 15 L * ? *)
   fetch-restaurant-data:
     handler: src/functions/fetch-restaurant-data.handler
     events:
       - http:
           method: get
           path: fetch-restaurant-data
-      - schedule: cron(0 15 14,L * ? *)
+      - schedule: cron(0 15 14 * ? *)
+      - schedule: cron(0 15 L * ? *)
   send-data:
     handler: src/functions/send-data.handler
     events:
