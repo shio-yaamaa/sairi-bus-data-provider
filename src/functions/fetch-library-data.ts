@@ -1,3 +1,4 @@
+import { URLSearchParams } from 'url';
 import * as AWS from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { JSDOM } from 'jsdom';
@@ -28,22 +29,26 @@ const dynamodb = new AWS.DynamoDB({
 const CLOSED_TEXT = 'Closed';
 const NEXT_MORNING_TEXT = '翌朝';
 
+const buildQueryParams = (date: JSTDate): URLSearchParams => {
+  const params = new URLSearchParams();
+  params.append('getYear', date.year.toString());
+  params.append('month', (date.month + 1).toString());
+  return params;
+};
+
 const fetchLibraryData = async (): Promise<LibraryData> => {
   const libraryData: LibraryData = {
     dailyDataList: []
   };
 
   for (const [libraryIndex, URL] of [MAIN_LIBRARY_URL, LIFE_SCIENCES_LIBRARY_URL, SCIENCE_AND_ENGINEERING_LIBRARY_URL, INTERNATIONAL_STUDIES_LIBRARY_URL].entries()) {
-    const { document } = (await JSDOM.fromURL(URL)).window;
+    const currentDate = JSTDate.getCurrentJSTDate();
+    const { document } = (await JSDOM.fromURL(`${URL}?${buildQueryParams(currentDate).toString()}`)).window;
 
     const titleText = document.querySelector('title').textContent;
     const libraryName = titleText.substring(0, titleText.indexOf('図書館'));
 
     const table = document.querySelector('table');
-    const tableCaption = table.querySelector('caption').textContent;
-
-    const year = parseInt(tableCaption.substring(0, tableCaption.indexOf('年')));
-    const month = parseInt(tableCaption.substring(tableCaption.indexOf('年') + 1, tableCaption.indexOf('月'))) - 1;
 
     for (const td of Array.from(table.querySelectorAll('td'))) {
       const childNodes = Array.from(td.childNodes);
@@ -72,7 +77,7 @@ const fetchLibraryData = async (): Promise<LibraryData> => {
       libraryData.dailyDataList.push({
         libraryIndex,
         libraryName,
-        date: new JSTDate(year, month, date),
+        date: new JSTDate(currentDate.year, currentDate.month, date),
         schedules: isClosed ? [] : [schedule]
       });
     }
