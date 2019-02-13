@@ -12,5 +12,6 @@ export interface ClassworkSchedule extends Schedule {
   startTime: JSTTime;
   endTime: JSTTime;
   name: string;
-  laneIndex: number;
+  laneIndex?: number;
+  colorIndex: number;
 }

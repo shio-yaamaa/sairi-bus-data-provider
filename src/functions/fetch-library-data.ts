@@ -10,6 +10,7 @@ import {
   SCIENCE_AND_ENGINEERING_LIBRARY_URL,
   INTERNATIONAL_STUDIES_LIBRARY_URL
 } from '../constants/urls';
+import { ColorIndex } from '../constants/color-index';
 
 import {
   LibraryData,
@@ -63,7 +64,8 @@ const fetchLibraryData = async (): Promise<LibraryData> => {
           startTime: JSTTime.fromColonSeparatedText(startTimeString),
           endTime: endsNextMorning ? null : JSTTime.fromColonSeparatedText(endTimeString),
           endsNextMorning,
-          laneIndex: 0
+          laneIndex: 0,
+          colorIndex: ColorIndex.Library
         };
       }
 

@@ -20,4 +20,5 @@ export interface LibrarySchedule extends Schedule {
   endTime: JSTTime; // Invalid when endsNextMorning is true
   endsNextMorning: boolean;
   laneIndex: number;
+  colorIndex: number;
 }

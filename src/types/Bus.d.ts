@@ -11,12 +11,14 @@ export interface BusSection {
   index: number;
   endpointNames: string[];
   directions: BusDirection[];
+  colorIndex: number;
 }
 
 export interface BusDirection {
   index: number;
   stopNames: string[];
   schedules: BusSchedule[];
+  colorIndex: number;
 }
 
 export interface BusSchedule extends Schedule {
@@ -28,6 +30,7 @@ export interface BusSchedule extends Schedule {
   runsTwice: boolean;
   stopsAtRimd: boolean; // RIMD = Research Institute for Microbial Diseases, Osaka University
   laneIndex?: number;
+  colorIndex: number;
 }
 
 export interface BusStopTime {

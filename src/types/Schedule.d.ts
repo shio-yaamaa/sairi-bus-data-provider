@@ -5,8 +5,10 @@ export interface Schedule {
   startTime: JSTTime;
   endTime: JSTTime;
   laneIndex?: number;
+  colorIndex: number;
 }
 
+// TODO: ???
 export interface Lane {
   index: number;
   schedules: Schedule[];

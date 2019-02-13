@@ -5,6 +5,7 @@ import * as uuidv4 from 'uuid/v4';
 
 import { RootItemKey, UpdateDateKey } from '../constants/db-keys';
 import { BUS_URL } from '../constants/urls';
+import { busSectionIndexToColorIndex, busDirectionIndexToColorIndex } from '../constants/color-index';
 
 import {
   BusData,
@@ -45,7 +46,8 @@ const fetchBusData = async (): Promise<BusData> => {
       endpointNames: sectionTitle
         .substring(sectionTitle.indexOf('．') + 1, sectionTitle.indexOf('地区間'))
         .split('⇔'),
-      directions: []
+      directions: [],
+      colorIndex: busSectionIndexToColorIndex(tableIndex)
     }
     busData.sections.push(section);
 
@@ -74,7 +76,8 @@ const fetchBusData = async (): Promise<BusData> => {
       const direction: BusDirection = {
         index: columnGroupIndex,
         stopNames: [],
-        schedules: []
+        schedules: [],
+        colorIndex: busDirectionIndexToColorIndex(section.index, columnGroupIndex)
       };
       // Each column represents a single bus stop
       direction.stopNames = Array.from(tableHeaderRow.children)
@@ -133,7 +136,8 @@ const fetchBusData = async (): Promise<BusData> => {
           stopTimes,
           name,
           runsTwice,
-          stopsAtRimd
+          stopsAtRimd,
+          colorIndex: busDirectionIndexToColorIndex(section.index, columnGroupIndex)
         };
         section.directions[columnGroupIndex].schedules.push(busSchedule);
       }

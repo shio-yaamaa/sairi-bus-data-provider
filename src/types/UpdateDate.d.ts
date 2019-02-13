@@ -10,8 +10,3 @@ export interface UpdateDates {
   library: JSTDate;
   restaurant: JSTDate;
 }
-
-export interface UpdateDateEntry {
-  key: UpdateDateKey;
-  date: JSTDate;
-}

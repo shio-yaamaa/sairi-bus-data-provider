@@ -5,10 +5,10 @@ import * as uuidv4 from 'uuid/v4';
 
 import { RootItemKey, UpdateDateKey } from '../constants/db-keys';
 import { RESTAURANT_URLS } from '../constants/urls';
+import { restaurantCampusIndexToColorIndex } from '../constants/color-index';
 
 import {
   RestaurantData,
-  RestaurantCampus,
   RestaurantSchedule
 } from '../types/Restaurant';
 
@@ -25,15 +25,10 @@ const CLOSED_TEXT = '休業';
 
 const fetchRestaurantData = async (): Promise<RestaurantData> => {
   const restaurantData: RestaurantData = {
-    campuses: []
+    dailyDataList: []
   };
 
   for (const [campusIndex, { campusName, url }] of RESTAURANT_URLS.entries()) {
-    const campus: RestaurantCampus = {
-      index: campusIndex,
-      name: campusName,
-      dailyDataList: []
-    };
     const { document } = (await JSDOM.fromURL(url)).window;
     const currentDate = JSTDate.getCurrentJSTDate();
 
@@ -68,10 +63,13 @@ const fetchRestaurantData = async (): Promise<RestaurantData> => {
             id: uuidv4(),
             startTime: JSTTime.fromColonSeparatedText(startTimeString),
             endTime: JSTTime.fromColonSeparatedText(endTimeString),
-            laneIndex: 0
+            laneIndex: 0,
+            colorIndex: restaurantCampusIndexToColorIndex(campusIndex)
           };
         }
-        campus.dailyDataList.push({
+        restaurantData.dailyDataList.push({
+          campusIndex,
+          campusName,
           restaurantIndex,
           restaurantName,
           date: new JSTDate(currentDate.year, currentDate.month, date),
@@ -79,7 +77,6 @@ const fetchRestaurantData = async (): Promise<RestaurantData> => {
         });
       }
     }
-    restaurantData.campuses.push(campus);
   }
 
   return restaurantData;
